@@ -45,7 +45,6 @@ const defaultSteps = [
     stepName: '2x BIG Images',
     size: [960, 836],
     suffix: '_retina',
-    folder: 'retina',
   },
   {
     stepName: '1x BIG Images',
