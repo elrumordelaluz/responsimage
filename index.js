@@ -15,7 +15,7 @@ const createDirIfDoesntExists = dir => {
   spinner.start(`Checking ${dir} directory`)
   return statAsync(dir)
     .then(a => {
-      spinner.succeed(`Directory ${dir} alreay exists`)
+      spinner.succeed(`Directory ${dir} already exists`)
       return Promise.resolve()
     })
     .catch(err => {
@@ -45,6 +45,7 @@ const defaultSteps = [
     stepName: '2x BIG Images',
     size: [960, 836],
     suffix: '_retina',
+    folder: 'retina',
   },
   {
     stepName: '1x BIG Images',
@@ -66,12 +67,16 @@ const processStep = async (image, step, options) => {
   const suffix = step.suffix || ''
   const name = step.name || options.name
   const webp = step.webp || (step.webp === undefined && options.webp)
-  const dir = options.dir
   const ext = step.ext || options.ext || 'jpg'
   const stepName = step.stepName || 'Image step'
   const hasSize = step.size && Array.isArray(step.size)
   spinner.start(`Processing ${step.stepName || 'step'}`)
   if (hasSize && name) {
+    let dir = options.dir
+    if (step.folder) {
+      dir = `${dir}/${step.folder}`
+      await createDirIfDoesntExists(dir)
+    }
     const init = await image.clone().resize(step.size[0], step.size[1])
     const filename = path.resolve(dir, `${name}${suffix}.${ext}`)
     await init.toFile(filename)
