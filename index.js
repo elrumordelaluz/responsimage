@@ -12,7 +12,7 @@ const mkdirAsync = promisify(mkdirp)
 const spinner = ora()
 
 const createDirIfDoesntExists = dir => {
-  spinner.start(`Checking ${outputFolder} directory`)
+  spinner.start(`Checking ${dir} directory`)
   return statAsync(dir)
     .then(a => {
       spinner.succeed(`Directory ${dir} alreay exists`)
@@ -42,78 +42,74 @@ const getSource = async source => {
 
 const defaultSteps = [
   {
-    stepName: '2x DEFAULT Images',
+    stepName: '2x BIG Images',
     size: [960, 836],
     suffix: '_retina',
-    // webp: true,
   },
   {
-    stepName: '1x DEFAULT Images',
+    stepName: '1x BIG Images',
     size: [540, 470],
-    // webp: true,
   },
   {
     stepName: '2x SMALL Images',
     size: [750, 653],
     suffix: '_small_retina',
-    // webp: true,
   },
   {
     stepName: '1x SMALL Images',
     size: [375, 326],
     suffix: '_small',
-    // webp: true,
   },
 ]
 
-
+const processStep = async (image, step, options) => {
+  const suffix = step.suffix || ''
+  const name = step.name || options.name
+  const webp = step.webp || (step.webp === undefined && options.webp)
+  const dir = options.dir
+  const ext = step.ext || options.ext || 'jpg'
+  const stepName = step.stepName || 'Image step'
+  const hasSize = step.size && Array.isArray(step.size)
+  spinner.start(`Processing ${step.stepName || 'step'}`)
+  if (hasSize && name) {
+    const init = await image.clone().resize(step.size[0], step.size[1])
+    const filename = path.resolve(dir, `${name}${suffix}.${ext}`)
+    await init.toFile(filename)
+    if (webp) {
+      const filenameWebp = path.resolve(dir, `${name}${suffix}.webp`)
+      await init.webp().toFile(filenameWebp)
+    }
+    spinner.succeed(
+      `${stepName} [${step.size[0]}, ${step.size[1]}] (${ext} ${
+        webp ? '+ webp' : ''
+      })`
+    )
+  } else {
+    spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
+  }
+  return Promise.resolve()
+}
 
 const re = /[^\\]*\.(\w+)$/
 
-const processImage = async ({
+const processImage = async (
   source,
-  outputFolder = './',
-  name,
-  steps = defaultSteps,
-}) => {
+  { dir = './', webp, name, steps = defaultSteps } = {}
+) => {
   try {
-    // const re = /[^\\]*\.(\w+)$/
     const ext = source.match(re)[1]
-
-    const dir = await createDirIfDoesntExists(outputFolder)
+    const output = await createDirIfDoesntExists(dir)
     const input = await getSource(source)
     spinner.info(`Source: ${source}`)
-
+    spinner.info(`Destination: ${dir}`)
     const initImage = await sharp(input)
+    const options = { webp, dir, name, ext }
     const processSteps = await Promise.all(
-      steps.map(async step => {
-        const suffix = step.suffix || ''
-        spinner.start(`Processing ${step.stepName || 'step'}`)
-        const init = await initImage.clone().resize(step.size[0], step.size[1])
-        const filename = path.resolve(outputFolder, `${name}${suffix}.${ext}`)
-        await init.toFile(filename)
-        if (step.webp) {
-          const filenameWebp = path.resolve(
-            outputFolder,
-            `${name}${suffix}.webp`
-          )
-          await init.webp().toFile(filenameWebp)
-        }
-        spinner.succeed(`${step.stepName || 'step'} done`)
-        return await Promise.resolve(step.stepName)
-      })
+      steps.map(async step => await processStep(initImage, step, options))
     )
   } catch (err) {
     console.log(err.stack)
   }
-}
-
-const source = process.argv[2]
-const outputFolder = process.argv[3]
-const name = process.argv[4]
-
-if (source && name) {
-  processImage({ source, name, outputFolder })
 }
 
 module.exports = processImage
