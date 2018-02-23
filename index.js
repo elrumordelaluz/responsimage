@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const { promisify } = require('util')
 const sharp = require('sharp')
 const axios = require('axios')
@@ -39,60 +40,69 @@ const getSource = async source => {
   return Promise.resolve(source)
 }
 
-const processImage = async ({ source, outputFolder = './', name }) => {
+const defaultSteps = [
+  {
+    stepName: '2x DEFAULT Images',
+    size: [960, 836],
+    suffix: '_retina',
+    // webp: true,
+  },
+  {
+    stepName: '1x DEFAULT Images',
+    size: [540, 470],
+    // webp: true,
+  },
+  {
+    stepName: '2x SMALL Images',
+    size: [750, 653],
+    suffix: '_small_retina',
+    // webp: true,
+  },
+  {
+    stepName: '1x SMALL Images',
+    size: [375, 326],
+    suffix: '_small',
+    // webp: true,
+  },
+]
+
+
+
+const re = /[^\\]*\.(\w+)$/
+
+const processImage = async ({
+  source,
+  outputFolder = './',
+  name,
+  steps = defaultSteps,
+}) => {
   try {
-    const re = /[^\\]*\.(\w+)$/
+    // const re = /[^\\]*\.(\w+)$/
     const ext = source.match(re)[1]
 
-    await createDirIfDoesntExists(outputFolder)
+    const dir = await createDirIfDoesntExists(outputFolder)
     const input = await getSource(source)
-    spinner.info(source)
+    spinner.info(`Source: ${source}`)
+
     const initImage = await sharp(input)
-    
-    spinner.start(`Processing 2x DEFAULT Images`)
-    const fnDefaultRetina = `${outputFolder}/${name}_retina.${ext}`
-    const fnDefaultRetinaWebp = `${outputFolder}/${name}_retina.webp`
-    // const defaultRetinaResized = await initImage.clone().resize(1080, 940)
-    const defaultRetinaResized = await initImage.clone().resize(960, 836)
-    const defaultRetinaJpg = await defaultRetinaResized.toFile(fnDefaultRetina)
-    const defaultRetinaWebp = await defaultRetinaResized
-      .webp()
-      .toFile(fnDefaultRetinaWebp)
-    spinner.succeed(`2x DEFAULT images written`)
-    spinner.info(fnDefaultRetina)
-    spinner.info(fnDefaultRetinaWebp)
-
-    spinner.start(`Processing 1x DEFAULT Images`)
-    const fnDefault = `${outputFolder}/${name}.${ext}`
-    const fnDefaultWebp = `${outputFolder}/${name}.webp`
-    const defaultResized = await initImage.clone().resize(540, 470)
-    const defaultJpg = await defaultResized.toFile(fnDefault)
-    const defaultWebp = await defaultResized.webp().toFile(fnDefaultWebp)
-    spinner.succeed(`1x DEFAULT images written `)
-    spinner.info(fnDefault)
-    spinner.info(fnDefaultWebp)
-
-    spinner.start(`Processing 2x SMALL Images`)
-    const fnSmallRetina = `./${outputFolder}/${name}_small_retina.${ext}`
-    const fnSmallRetinaWebp = `./${outputFolder}/${name}_small_retina.webp`
-    const smallRetinaResized = await initImage.clone().resize(750, 653)
-    const smallRetinaJpg = await smallRetinaResized.toFile(fnSmallRetina)
-    const smallRetinaWebp = await smallRetinaResized
-      .webp()
-      .toFile(fnSmallRetinaWebp)
-    spinner.succeed(`2x SMALL images written`)
-    spinner.info(fnSmallRetina)
-    spinner.info(fnSmallRetinaWebp)
-
-    spinner.start(`Processing 1x SMALL Images`)
-    const fnSmall = `./${outputFolder}/${name}_small.${ext}`
-    const fnSmallWebp = `./${outputFolder}/${name}_small.webp`
-    const smallResized = await initImage.clone().resize(375, 326)
-    const smallJpg = await smallResized.toFile(fnSmall)
-    const smallWebp = await smallResized.webp().toFile(fnSmallWebp)
-    spinner.succeed(`2x SMALL images written `)
-    spinner.info(fnSmall)
-    spinner.info(fnSmallWebp)
+    const processSteps = await Promise.all(
+      steps.map(async step => {
+        const suffix = step.suffix || ''
+        spinner.start(`Processing ${step.stepName || 'step'}`)
+        const init = await initImage.clone().resize(step.size[0], step.size[1])
+        const filename = path.resolve(outputFolder, `${name}${suffix}.${ext}`)
+        await init.toFile(filename)
+        if (step.webp) {
+          const filenameWebp = path.resolve(
+            outputFolder,
+            `${name}${suffix}.webp`
+          )
+          await init.webp().toFile(filenameWebp)
+        }
+        spinner.succeed(`${step.stepName || 'step'} done`)
+        return await Promise.resolve(step.stepName)
+      })
+    )
   } catch (err) {
     console.log(err.stack)
   }
