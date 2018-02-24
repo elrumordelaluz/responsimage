@@ -98,7 +98,7 @@ const re = /[^\\]*\.(\w+)$/
 
 const processImage = async (
   source,
-  { dir = './', webp, name, steps = defaultSteps } = {}
+  { dir = './', webp, name = 'out', steps = defaultSteps } = {}
 ) => {
   try {
     const ext = source.match(re)[1]
@@ -117,3 +117,20 @@ const processImage = async (
 }
 
 module.exports = processImage
+module.exports.retina = async (source, size, options) => {
+  const opts = {
+    ...options,
+    steps: [
+      {
+        stepName: '2x Image',
+        size: size.map(s => s * 2),
+        suffix: '_retina',
+      },
+      {
+        stepName: '1x Image',
+        size,
+      },
+    ],
+  }
+  return await processImage(source, opts)
+}
