@@ -84,8 +84,8 @@ const processStep = async (image, step, options) => {
       await init.webp().toFile(filenameWebp)
     }
     spinner.succeed(
-      `${stepName} [${step.size[0]}, ${step.size[1]}] (${ext} ${
-        webp ? '+ webp' : ''
+      `${stepName} [${step.size[0]}, ${step.size[1]}] (${ext}${
+        webp ? ' + webp' : ''
       })`
     )
   } else {
@@ -98,10 +98,10 @@ const re = /[^\\]*\.(\w+)$/
 
 const processImage = async (
   source,
-  { dir = './', webp, name = 'out', steps = defaultSteps } = {}
+  { dir = './', webp, name = 'out', fileType, steps = defaultSteps } = {}
 ) => {
   try {
-    const ext = source.match(re)[1]
+    const ext = fileType || source.match(re)[1]
     const output = await createDirIfDoesntExists(dir)
     const input = await getSource(source)
     spinner.info(`Source: ${source}`)
@@ -112,7 +112,7 @@ const processImage = async (
       steps.map(async step => await processStep(initImage, step, options))
     )
   } catch (err) {
-    console.log(err.stack)
+    spinner.fail(err.stack)
   }
 }
 
