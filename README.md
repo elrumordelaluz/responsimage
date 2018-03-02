@@ -3,17 +3,29 @@
 Create an array of images from a single input
 
 ### Example
+
 ```js
 
 ;(async function() {
   const source = 'http://lorempixel.com/1200/600/'
-  const name = 'my-image'
-  await responsimage(source, { name })
+  const options = {
+    name: 'my-image'
+  }
+  await responsimage(source, options)
 })()
 
 ```
 
-### API
+## API
+
+### source
+
+Can be:
+- a `Buffer` containing JPEG, PNG, WebP, GIF, SVG, TIFF or raw pixel image data
+- a `String` containing the path to an JPEG, PNG, WebP, GIF, SVG or TIFF image file
+- an `URL` pointing to an image resource
+
+### 
 
 _wip_
 
