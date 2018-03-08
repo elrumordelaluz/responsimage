@@ -84,9 +84,8 @@ const processStep = async (image, step, options) => {
       await init.webp().toFile(filenameWebp)
     }
     spinner.succeed(
-      `${stepName} [${step.size[0]}, ${step.size[1]}] (${ext}${
-        webp ? ' + webp' : ''
-      })`
+      `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
+        'auto'}] (${ext}${webp ? ' + webp' : ''})`
     )
   } else {
     spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
