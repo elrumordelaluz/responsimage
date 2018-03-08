@@ -98,7 +98,13 @@ const re = /[^\\]*\.(\w+)$/
 
 const processImage = async (
   source,
-  { dir = './', webp, name = 'out', fileType, steps = defaultSteps } = {}
+  {
+    dir = './',
+    webp,
+    name = 'out',
+    fileType = 'jpg',
+    steps = defaultSteps,
+  } = {}
 ) => {
   try {
     const ext = fileType || source.match(re)[1]
