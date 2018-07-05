@@ -18,6 +18,8 @@ test.beforeEach(async t => {
     './test/fixtures',
     'marcelo-vaz-408595-unsplash.jpg'
   )
+  t.context.externalUrl =
+    'https://images.unsplash.com/photo-1507667522877-ad03f0c7b0e0'
   t.context.dir = await tempDir({ unsafeCleanup: true })
 })
 
@@ -62,4 +64,14 @@ test('Resize only width', async t => {
     { width, height },
     { width: newWidth, height: Math.round(originalHeight / factor) }
   )
+})
+
+test('URL input', async t => {
+  const { dir, name, externalUrl } = t.context
+  const input = externalUrl
+  const steps = [{ size: [250, 250], name }]
+
+  await processImage(input, { dir, steps })
+  const { width, height } = await sizeOf(path.resolve(dir, `${name}.jpg`))
+  t.deepEqual({ width, height }, { width: 250, height: 250 })
 })
