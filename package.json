@@ -1,10 +1,14 @@
 {
   "name": "responsimage",
   "version": "1.0.0",
-  "main": "index.js",
-  "author":
-    "Lionel T <elrumordelaluz@hotmail.com> (https://elrumordelaluz.com/)",
+  "main": "dist/responsimage.cjs.js",
+  "module": "dist/responsimage.esm.js",
+  "author": "Lionel T <elrumordelaluz@hotmail.com> (https://elrumordelaluz.com/)",
   "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "axios": "0.18.0",
     "mkdirp": "0.5.1",
@@ -15,9 +19,15 @@
     "ava": "0.25.0",
     "image-size": "0.6.2",
     "rimraf": "2.6.2",
+    "rollup": "0.62.0",
+    "rollup-plugin-babel": "3.0.7",
     "tmp": "0.0.33"
   },
   "scripts": {
-    "test": "ava -v"
+    "prepare": "npm run build",
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "ava",
+    "pretest": "npm run build"
   }
 }

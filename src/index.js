@@ -123,8 +123,7 @@ const processImage = async (
 
 module.exports = processImage
 module.exports.retina = async (source, size, options) => {
-  const opts = {
-    ...options,
+  const opts = Object.assign({}, options, {
     steps: [
       {
         stepName: '2x Image',
@@ -136,6 +135,6 @@ module.exports.retina = async (source, size, options) => {
         size,
       },
     ],
-  }
+  })
   return await processImage(source, opts)
 }

@@ -4,7 +4,7 @@ import test from 'ava'
 import rimraf from 'rimraf'
 import tmp from 'tmp'
 import imageSize from 'image-size'
-import processImage from './'
+import processImage from './dist/responsimage.cjs'
 import { promisify } from 'util'
 
 const primraf = promisify(rimraf)
