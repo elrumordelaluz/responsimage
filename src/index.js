@@ -1,12 +1,12 @@
-const fs = require('fs')
-const path = require('path')
-const { promisify } = require('util')
-const sharp = require('sharp')
-const axios = require('axios')
-const ora = require('ora')
-const mkdirp = require('mkdirp')
+import { stat } from 'fs'
+import { resolve } from 'path'
+import { promisify } from 'util'
+import sharp from 'sharp'
+import axios from 'axios'
+import ora from 'ora'
+import mkdirp from 'mkdirp'
 
-const statAsync = promisify(fs.stat)
+const statAsync = promisify(stat)
 const mkdirAsync = promisify(mkdirp)
 
 const spinner = ora()
@@ -77,10 +77,10 @@ const processStep = async (image, step, options) => {
       await createDirIfDoesntExists(dir)
     }
     const init = await image.clone().resize(step.size[0], step.size[1])
-    const filename = path.resolve(dir, `${name}${suffix}.${ext}`)
+    const filename = resolve(dir, `${name}${suffix}.${ext}`)
     await init.toFile(filename)
     if (webp) {
-      const filenameWebp = path.resolve(dir, `${name}${suffix}.webp`)
+      const filenameWebp = resolve(dir, `${name}${suffix}.webp`)
       await init.webp().toFile(filenameWebp)
     }
     spinner.succeed(
@@ -107,13 +107,12 @@ const processImage = async (
 ) => {
   try {
     const ext = fileType || source.match(re)[1]
-    const output = await createDirIfDoesntExists(dir)
     const input = await getSource(source)
     spinner.info(`Source: ${source}`)
     spinner.info(`Destination: ${dir}`)
     const initImage = await sharp(input)
     const options = { webp, dir, name, ext }
-    const processSteps = await Promise.all(
+    await Promise.all(
       steps.map(async step => await processStep(initImage, step, options))
     )
   } catch (err) {
@@ -121,8 +120,8 @@ const processImage = async (
   }
 }
 
-module.exports = processImage
-module.exports.retina = async (source, size, options) => {
+export default processImage
+export async function retina(source, size, options) {
   const opts = Object.assign({}, options, {
     steps: [
       {
