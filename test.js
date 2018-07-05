@@ -15,7 +15,7 @@ const tempDir = promisify(tmp.dir)
 test.beforeEach(async t => {
   t.context.name = 'test'
   t.context.input = path.resolve(
-    './test/fixtures',
+    './fixtures',
     'marcelo-vaz-408595-unsplash.jpg'
   )
   t.context.externalUrl =
