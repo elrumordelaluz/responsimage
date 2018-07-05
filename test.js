@@ -26,7 +26,7 @@ test.beforeEach(async t => {
 test('Generate output', async t => {
   const { input, dir, name } = t.context
   const steps = [{ size: [], name }]
-  await processImage(t.context.input, { dir, steps })
+  await processImage(input, { dir, steps })
   t.notThrows(async () => await pstat(path.resolve(dir, `${name}.jpg`)))
 })
 
