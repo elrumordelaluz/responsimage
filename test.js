@@ -1,13 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 import test from 'ava'
-import rimraf from 'rimraf'
 import tmp from 'tmp'
 import imageSize from 'image-size'
-import processImage from './dist/responsimage.cjs'
+import processImage, { retina } from './dist/responsimage.cjs'
 import { promisify } from 'util'
 
-const primraf = promisify(rimraf)
 const sizeOf = promisify(imageSize)
 const pstat = promisify(fs.stat)
 const tempDir = promisify(tmp.dir)
@@ -67,11 +65,24 @@ test('Resize only width', async t => {
 })
 
 test('URL input', async t => {
-  const { dir, name, externalUrl } = t.context
-  const input = externalUrl
+  const { dir, name, externalUrl: input } = t.context
   const steps = [{ size: [250, 250], name }]
 
   await processImage(input, { dir, steps })
   const { width, height } = await sizeOf(path.resolve(dir, `${name}.jpg`))
   t.deepEqual({ width, height }, { width: 250, height: 250 })
+})
+
+test('Retina', async t => {
+  const { dir, name, input } = t.context
+  await retina(input, [250, 250], { name, dir })
+  const { width, height } = await sizeOf(path.resolve(dir, `${name}.jpg`))
+  const { width: retinaWidth, height: retinaHeight } = await sizeOf(
+    path.resolve(dir, `${name}_retina.jpg`)
+  )
+  t.deepEqual({ width, height }, { width: 250, height: 250 })
+  t.deepEqual(
+    { width: retinaWidth, height: retinaHeight },
+    { width: 500, height: 500 }
+  )
 })
