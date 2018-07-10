@@ -3,7 +3,7 @@ import path from 'path'
 import test from 'ava'
 import tmp from 'tmp'
 import imageSize from 'image-size'
-import processImage, { retina } from './dist/responsimage.cjs'
+import processImage, { retinify } from './dist/responsimage.cjs'
 import { promisify } from 'util'
 
 const sizeOf = promisify(imageSize)
@@ -75,7 +75,7 @@ test('URL input', async t => {
 
 test('Retina', async t => {
   const { dir, name, input } = t.context
-  await retina(input, [250, 250], { name, dir })
+  await retinify(input, [250, 250], { name, dir })
   const { width, height } = await sizeOf(path.resolve(dir, `${name}.jpg`))
   const { width: retinaWidth, height: retinaHeight } = await sizeOf(
     path.resolve(dir, `${name}_retina.jpg`)

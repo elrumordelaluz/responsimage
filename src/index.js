@@ -121,7 +121,7 @@ const processImage = async (
 }
 
 export default processImage
-export async function retina(source, size, options) {
+export async function retinify(source, size, options) {
   const opts = Object.assign({}, options, {
     steps: [
       {
