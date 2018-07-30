@@ -11,29 +11,39 @@ const mkdirAsync = promisify(mkdirp)
 
 const spinner = ora()
 
-const createDirIfDoesntExists = dir => {
-  spinner.start(`Checking ${dir} directory`)
+const createDirIfDoesntExists = (dir, quiet) => {
+  if (!quiet) {
+    spinner.start(`Checking ${dir} directory`)
+  }
   return statAsync(dir)
     .then(a => {
-      spinner.succeed(`Directory ${dir} already exists`)
+      if (!quiet) {
+        spinner.succeed(`Directory ${dir} already exists`)
+      }
       return Promise.resolve()
     })
     .catch(err => {
-      spinner.succeed(`Directory ${dir} created`)
+      if (!quiet) {
+        spinner.succeed(`Directory ${dir} created`)
+      }
       return mkdirAsync(dir)
     })
 }
 
 const urlRe = /^(?:\w+:)?\/\/([^\s\.]+\.\S{2}|localhost[\:?\d]*)\S*$/
-const getSource = async source => {
-  spinner.start(`Getting Source Image`)
+const getSource = async (source, quiet) => {
+  if (!quiet) {
+    spinner.start(`Getting Source Image`)
+  }
   if (urlRe.test(source)) {
     return await axios({
       method: 'get',
       url: source,
       responseType: 'arraybuffer',
     }).then(res => {
-      spinner.succeed(`Source image fetched successfully`)
+      if (!quiet) {
+        spinner.succeed(`Source image fetched successfully`)
+      }
       return res.data
     })
   }
@@ -69,12 +79,14 @@ const processStep = async (image, step, options) => {
   const ext = step.ext || options.ext || 'jpg'
   const stepName = step.stepName || 'Image step'
   const hasSize = step.size && Array.isArray(step.size)
-  spinner.start(`Processing ${step.stepName || 'step'}`)
+  if (!options.quiet) {
+    spinner.start(`Processing ${step.stepName || 'step'}`)
+  }
   if (hasSize && name) {
     let dir = options.dir
     if (step.folder) {
       dir = `${dir}/${step.folder}`
-      await createDirIfDoesntExists(dir)
+      await createDirIfDoesntExists(dir, options.quiet)
     }
     const init = await image.clone().resize(step.size[0], step.size[1])
     const filename = resolve(dir, `${name}${suffix}.${ext}`)
@@ -83,12 +95,16 @@ const processStep = async (image, step, options) => {
       const filenameWebp = resolve(dir, `${name}${suffix}.webp`)
       await init.webp().toFile(filenameWebp)
     }
-    spinner.succeed(
-      `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
-        'auto'}] (${ext}${webp ? ' + webp' : ''})`
-    )
+    if (!options.quiet) {
+      spinner.succeed(
+        `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
+          'auto'}] (${ext}${webp ? ' + webp' : ''})`
+      )
+    }
   } else {
-    spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
+    if (!options.quiet) {
+      spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
+    }
   }
   return Promise.resolve()
 }
@@ -103,20 +119,25 @@ const processImage = async (
     name = 'out',
     fileType = 'jpg',
     steps = defaultSteps,
+    quiet = false,
   } = {}
 ) => {
   try {
     const ext = fileType || source.match(re)[1]
-    const input = await getSource(source)
-    spinner.info(`Source: ${source}`)
-    spinner.info(`Destination: ${dir}`)
+    const input = await getSource(source, quiet)
+    if (!quiet) {
+      spinner.info(`Source: ${source}`)
+      spinner.info(`Destination: ${dir}`)
+    }
     const initImage = await sharp(input)
-    const options = { webp, dir, name, ext }
+    const options = { webp, dir, name, ext, quiet }
     await Promise.all(
       steps.map(async step => await processStep(initImage, step, options))
     )
   } catch (err) {
-    spinner.fail(err.stack)
+    if (!quiet) {
+      spinner.fail(err.stack)
+    }
   }
 }
 
