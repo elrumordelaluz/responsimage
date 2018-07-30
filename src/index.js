@@ -130,6 +130,7 @@ const processImage = async (
       spinner.info(`Destination: ${dir}`)
     }
     const initImage = await sharp(input)
+    await createDirIfDoesntExists(dir, quiet)
     const options = { webp, dir, name, ext, quiet }
     await Promise.all(
       steps.map(async step => await processStep(initImage, step, options))
