@@ -27,25 +27,26 @@ responsimage(input, [options])
 
 Type: `String|Buffer`
 
-* a `Buffer` containing JPEG, PNG, WebP, GIF, SVG, TIFF or raw pixel image data
-* a `String` containing the path to an JPEG, PNG, WebP, GIF, SVG or TIFF image file
-* an `URL` pointing to an image resource
+- a `Buffer` containing JPEG, PNG, WebP, GIF, SVG, TIFF or raw pixel image data
+- a `String` containing the path to an JPEG, PNG, WebP, GIF, SVG or TIFF image file
+- an `URL` pointing to an image resource
 
 #### options
 
 Type: `Object`
 
-* `dir` output folder (`String`) default: `./`
-* `webp` add `.webp` files (`Boolean`) default: `false`
-* `name` output images name (`String`) default: `out`
-* `fileType` output images type (`String`) default: `jpg`
-* `steps` (`[Object]`) default `defaultSteps`\*
+- `dir` output folder (`String`) default: `./`
+- `webp` add `.webp` files (`Boolean`) default: `false`
+- `name` output images name (`String`) default: `out`
+- `fileType` output images type (`String`) default: `jpg`
+- `steps` (`[Object]`) default `defaultSteps`\*
+- `quiet` hide console messages (`Boolean`) default: `false`
 
   Step shape
 
-  * `stepName` shown in verbose console (`String`)
-  * `size` size to process (`[width, height]`)
-  * `suffix` to add to `name` (`String`)
+  - `stepName` shown in verbose console (`String`)
+  - `size` size to process (`[width, height]`)
+  - `suffix` to add to `name` (`String`)
 
   ##### \*defaultSteps
 
