@@ -13,7 +13,7 @@
     "axios": "0.18.0",
     "mkdirp": "0.5.1",
     "ora": "1.4.0",
-    "sharp": "0.20.0"
+    "sharp": "0.20.5"
   },
   "devDependencies": {
     "ava": "0.25.0",
