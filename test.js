@@ -28,6 +28,17 @@ test('Generate output', async t => {
   t.notThrows(async () => await pstat(path.resolve(dir, `${name}.jpg`)))
 })
 
+test('Returns Array of files processed', async t => {
+  const { input, dir, name } = t.context
+  const steps = [
+    { size: [10, 10], name },
+    { size: [20, 20], name: `${name}_2` },
+  ]
+  const res = await processImage(input, { dir, steps })
+  t.true(Array.isArray(res))
+  t.deepEqual(res, [`${dir}/${name}.jpg`, `${dir}/${name}_2.jpg`])
+})
+
 test('Original size if empty Array provided', async t => {
   const { input, dir, name } = t.context
   const steps = [{ size: [], name }]

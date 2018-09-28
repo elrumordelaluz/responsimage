@@ -79,34 +79,39 @@ const processStep = async (image, step, options) => {
   const ext = step.ext || options.ext || 'jpg'
   const stepName = step.stepName || 'Image step'
   const hasSize = step.size && Array.isArray(step.size)
-  if (!options.quiet) {
-    spinner.start(`Processing ${step.stepName || 'step'}`)
-  }
-  if (hasSize && name) {
-    let dir = options.dir
-    if (step.folder) {
-      dir = `${dir}/${step.folder}`
-      await createDirIfDoesntExists(dir, options.quiet)
-    }
-    const init = await image.clone().resize(step.size[0], step.size[1])
-    const filename = resolve(dir, `${name}${suffix}.${ext}`)
-    await init.toFile(filename)
-    if (webp) {
-      const filenameWebp = resolve(dir, `${name}${suffix}.webp`)
-      await init.webp().toFile(filenameWebp)
-    }
+  try {
     if (!options.quiet) {
-      spinner.succeed(
-        `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
-          'auto'}] (${ext}${webp ? ' + webp' : ''})`
-      )
+      spinner.start(`Processing ${step.stepName || 'step'}`)
     }
-  } else {
-    if (!options.quiet) {
-      spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
+    if (hasSize && name) {
+      let dir = options.dir
+      if (step.folder) {
+        dir = `${dir}/${step.folder}`
+        await createDirIfDoesntExists(dir, options.quiet)
+      }
+      const init = await image.clone().resize(step.size[0], step.size[1])
+      const filename = resolve(dir, `${name}${suffix}.${ext}`)
+      await init.toFile(filename)
+      if (webp) {
+        const filenameWebp = resolve(dir, `${name}${suffix}.webp`)
+        await init.webp().toFile(filenameWebp)
+      }
+      if (!options.quiet) {
+        spinner.succeed(
+          `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
+            'auto'}] (${ext}${webp ? ' + webp' : ''})`
+        )
+      }
+      return Promise.resolve(filename)
+    } else {
+      if (!options.quiet) {
+        spinner.fail(`${stepName} needs a valid 'size' and 'name' values`)
+      }
+      throw `${stepName} needs a valid 'size' and 'name' values`
     }
+  } catch (err) {
+    Promise.reject(err)
   }
-  return Promise.resolve()
 }
 
 const re = /[^\\]*\.(\w+)$/
@@ -123,6 +128,7 @@ const processImage = async (
   } = {}
 ) => {
   try {
+    let processedSteps = []
     const ext = fileType || source.match(re)[1]
     const input = await getSource(source, quiet)
     if (!quiet) {
@@ -132,9 +138,16 @@ const processImage = async (
     const initImage = await sharp(input)
     await createDirIfDoesntExists(dir, quiet)
     const options = { webp, dir, name, ext, quiet }
-    await Promise.all(
-      steps.map(async step => await processStep(initImage, step, options))
-    )
+
+    for (let step of steps) {
+      const f = await processStep(initImage, step, options)
+      processedSteps.push(f)
+    }
+
+    return Promise.resolve(processedSteps)
+    // await Promise.all(
+    //   steps.map(async step => await processStep(initImage, step, options))
+    // )
   } catch (err) {
     if (!quiet) {
       spinner.fail(err.stack)
