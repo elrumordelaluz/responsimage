@@ -5,6 +5,8 @@ import tmp from 'tmp'
 import imageSize from 'image-size'
 import processImage, { retinify } from './dist/responsimage.cjs'
 import { promisify } from 'util'
+import ColorThief from 'color-thief'
+import hexColor from 'hex-color-regex'
 
 const sizeOf = promisify(imageSize)
 const pstat = promisify(fs.stat)
@@ -34,9 +36,9 @@ test('Returns Array of files processed', async t => {
     { size: [10, 10], name },
     { size: [20, 20], name: `${name}_2` },
   ]
-  const res = await processImage(input, { dir, steps, quiet: true })
-  t.true(Array.isArray(res))
-  t.deepEqual(res, [`${dir}/${name}.jpg`, `${dir}/${name}_2.jpg`])
+  const { images } = await processImage(input, { dir, steps, quiet: true })
+  t.true(Array.isArray(images))
+  t.deepEqual(images, [`${dir}/${name}.jpg`, `${dir}/${name}_2.jpg`])
 })
 
 test('Original size if empty Array provided', async t => {
@@ -75,7 +77,7 @@ test('Resize only width', async t => {
   )
 })
 
-test.only('URL input', async t => {
+test('URL input', async t => {
   const { dir, name, externalUrl: input } = t.context
   const steps = [{ size: [250, 250], name }]
 
@@ -96,4 +98,19 @@ test('Retina', async t => {
     { width: retinaWidth, height: retinaHeight },
     { width: 500, height: 500 }
   )
+})
+
+test('Dominant Color', async t => {
+  const colorThief = new ColorThief()
+  const { dir, name } = t.context
+  const steps = [{ size: [250, 250], name }]
+  const input = path.resolve('./fixtures', 'color.jpg')
+  const dominant = await colorThief.getColor(input)
+  const { rgb, hex } = await processImage(input, {
+    dir,
+    steps,
+    quiet: true,
+  })
+  t.true(rgb.every(c => dominant.includes(c)))
+  t.true(hexColor().test(hex))
 })

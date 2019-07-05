@@ -5,11 +5,12 @@ import sharp from 'sharp'
 import fetch from 'isomorphic-unfetch'
 import ora from 'ora'
 import mkdirp from 'mkdirp'
-
+import ColorThief from 'color-thief'
 const statAsync = promisify(stat)
 const mkdirAsync = promisify(mkdirp)
 
 const spinner = ora()
+const colorThief = new ColorThief()
 
 const createDirIfDoesntExists = (dir, quiet) => {
   if (!quiet) {
@@ -132,12 +133,15 @@ const processImage = async (
     fileType = 'jpg',
     steps = defaultSteps,
     quiet = false,
+    colorHex = false,
   } = {}
 ) => {
   try {
     let processedSteps = []
     const ext = fileType || source.match(re)[1]
     const input = await getSource(source, quiet)
+    const color = await colorThief.getColor(input)
+
     if (!quiet) {
       spinner.info(`Source: ${source}`)
       spinner.info(`Destination: ${dir}`)
@@ -151,10 +155,11 @@ const processImage = async (
       processedSteps.push(f)
     }
 
-    return Promise.resolve(processedSteps)
-    // await Promise.all(
-    //   steps.map(async step => await processStep(initImage, step, options))
-    // )
+    return Promise.resolve({
+      images: processedSteps,
+      rgb: color,
+      hex: RGBToHex(color),
+    })
   } catch (err) {
     if (!quiet) {
       spinner.fail(err.stack)
@@ -162,7 +167,20 @@ const processImage = async (
   }
 }
 
+function RGBToHex(rgb) {
+  let r = rgb[0].toString(16)
+  let g = rgb[1].toString(16)
+  let b = rgb[2].toString(16)
+
+  if (r.length == 1) r = '0' + r
+  if (g.length == 1) g = '0' + g
+  if (b.length == 1) b = '0' + b
+
+  return '#' + r + g + b
+}
+
 export default processImage
+
 export async function retinify(source, size, options) {
   const opts = Object.assign({}, options, {
     steps: [

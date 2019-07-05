@@ -10,6 +10,7 @@ export default [
       'util',
       'sharp',
       'isomorphic-unfetch',
+      'color-thief',
       'ora',
       'mkdirp',
     ],
