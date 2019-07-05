@@ -4,7 +4,15 @@ import pkg from './package.json'
 export default [
   {
     input: 'src/index.js',
-    external: ['fs', 'path', 'util', 'sharp', 'axios', 'ora', 'mkdirp'],
+    external: [
+      'fs',
+      'path',
+      'util',
+      'sharp',
+      'isomorphic-unfetch',
+      'ora',
+      'mkdirp',
+    ],
     plugins: [
       babel({
         exclude: ['node_modules/**'],

@@ -2,7 +2,7 @@ import { stat } from 'fs'
 import { resolve } from 'path'
 import { promisify } from 'util'
 import sharp from 'sharp'
-import axios from 'axios'
+import fetch from 'isomorphic-unfetch'
 import ora from 'ora'
 import mkdirp from 'mkdirp'
 
@@ -36,18 +36,25 @@ const getSource = async (source, quiet) => {
     spinner.start(`Getting Source Image`)
   }
   if (urlRe.test(source)) {
-    return await axios({
-      method: 'get',
-      url: source,
-      responseType: 'arraybuffer',
-    }).then(res => {
-      if (!quiet) {
-        spinner.succeed(`Source image fetched successfully`)
-      }
-      return res.data
-    })
+    return await fetch(source)
+      .then(response => response.arrayBuffer())
+      .then(arrayBuffer => {
+        if (!quiet) {
+          spinner.succeed(`Source image fetched successfully`)
+        }
+        return toBuffer(arrayBuffer)
+      })
   }
   return Promise.resolve(source)
+}
+
+function toBuffer(ab) {
+  const buf = Buffer.alloc(ab.byteLength)
+  const view = new Uint8Array(ab)
+  for (let i = 0; i < buf.length; ++i) {
+    buf[i] = view[i]
+  }
+  return buf
 }
 
 const defaultSteps = [
