@@ -133,7 +133,7 @@ const processImage = async (
     fileType = 'jpg',
     steps = defaultSteps,
     quiet = false,
-    colorHex = false,
+    noWrite = false,
   } = {}
 ) => {
   try {
@@ -142,17 +142,19 @@ const processImage = async (
     const input = await getSource(source, quiet)
     const color = await colorThief.getColor(input)
 
-    if (!quiet) {
-      spinner.info(`Source: ${source}`)
-      spinner.info(`Destination: ${dir}`)
-    }
-    const initImage = await sharp(input)
-    await createDirIfDoesntExists(dir, quiet)
-    const options = { webp, dir, name, ext, quiet }
+    if (!noWrite) {
+      if (!quiet) {
+        spinner.info(`Source: ${source}`)
+        spinner.info(`Destination: ${dir}`)
+      }
+      const initImage = await sharp(input)
+      await createDirIfDoesntExists(dir, quiet)
+      const options = { webp, dir, name, ext, quiet }
 
-    for (let step of steps) {
-      const f = await processStep(initImage, step, options)
-      processedSteps.push(f)
+      for (let step of steps) {
+        const f = await processStep(initImage, step, options)
+        processedSteps.push(f)
+      }
     }
 
     return Promise.resolve({

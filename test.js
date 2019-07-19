@@ -114,3 +114,15 @@ test('Dominant Color', async t => {
   t.true(rgb.every(c => dominant.includes(c)))
   t.true(hexColor().test(hex))
 })
+
+test.only('No Write', async t => {
+  const { dir, input } = t.context
+  const { rgb, hex, images } = await processImage(input, {
+    dir,
+    steps: [],
+    quiet: true,
+    noWrite: true,
+  })
+  t.true(Array.isArray(images))
+  t.true(images.length === 0)
+})
