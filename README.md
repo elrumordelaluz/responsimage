@@ -16,6 +16,10 @@ const responsimage = require('responsimage')
 responsimage('http://lorempixel.com/1200/600/', {
   name: 'my-image',
   dir: './out',
+}).then(({ rgb, hex, images }) => {
+  // rgb: [ 168, 182, 187 ]
+  // hex: #a8b6bb
+  // images: []
 })
 ```
 

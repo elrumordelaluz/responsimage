@@ -115,7 +115,7 @@ test('Dominant Color', async t => {
   t.true(hexColor().test(hex))
 })
 
-test.only('No Write', async t => {
+test('No Write', async t => {
   const { dir, input } = t.context
   const { rgb, hex, images } = await processImage(input, {
     dir,
