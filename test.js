@@ -117,7 +117,7 @@ test('Dominant Color', async t => {
 
 test('No Write', async t => {
   const { dir, input } = t.context
-  const { rgb, hex, images } = await processImage(input, {
+  const { images } = await processImage(input, {
     dir,
     steps: [],
     quiet: true,
@@ -125,4 +125,17 @@ test('No Write', async t => {
   })
   t.true(Array.isArray(images))
   t.true(images.length === 0)
+})
+
+test('Fails', async t => {
+  const { dir, input } = t.context
+  const promise = () =>
+    processImage(path.resolve('./fixtures', 'errored.jpg'), {
+      dir,
+      steps: [],
+      quiet: true,
+      noWrite: true,
+    })
+  const error = await t.throwsAsync(promise)
+  t.is(error.message, 'Image given has not completed loading')
 })

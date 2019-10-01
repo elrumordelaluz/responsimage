@@ -166,6 +166,7 @@ const processImage = async (
     if (!quiet) {
       spinner.fail(err.stack)
     }
+    throw err
   }
 }
 
