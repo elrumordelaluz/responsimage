@@ -3,7 +3,7 @@ import path from 'path'
 import test from 'ava'
 import tmp from 'tmp'
 import imageSize from 'image-size'
-import processImage, { retinify } from './dist/responsimage.cjs'
+import processImage, { retinify, getColor } from './dist/responsimage.cjs'
 import { promisify } from 'util'
 import ColorThief from 'color-thief'
 import hexColor from 'hex-color-regex'
@@ -125,6 +125,13 @@ test('No Write', async t => {
   })
   t.true(Array.isArray(images))
   t.true(images.length === 0)
+})
+
+test('Get Only Color', async t => {
+  const { input } = t.context
+  const { rgb, hex } = await getColor(input)
+  t.true(Array.isArray(rgb))
+  t.true(typeof hex === 'string')
 })
 
 test('Fails', async t => {

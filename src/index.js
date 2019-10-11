@@ -12,23 +12,22 @@ const mkdirAsync = promisify(mkdirp)
 const spinner = ora()
 const colorThief = new ColorThief()
 
-const createDirIfDoesntExists = (dir, quiet) => {
+async function createDirIfDoesntExists(dir, quiet) {
   if (!quiet) {
     spinner.start(`Checking ${dir} directory`)
   }
-  return statAsync(dir)
-    .then(a => {
-      if (!quiet) {
-        spinner.succeed(`Directory ${dir} already exists`)
-      }
-      return Promise.resolve()
-    })
-    .catch(err => {
-      if (!quiet) {
-        spinner.succeed(`Directory ${dir} created`)
-      }
-      return mkdirAsync(dir)
-    })
+  try {
+    await statAsync(dir)
+    if (!quiet) {
+      spinner.succeed(`Directory ${dir} already exists`)
+    }
+    return Promise.resolve()
+  } catch (err) {
+    if (!quiet) {
+      spinner.succeed(`Directory ${dir} created`)
+    }
+    return mkdirAsync(dir)
+  }
 }
 
 const urlRe = /^(?:\w+:)?\/\/([^\s\.]+\.\S{2}|localhost[\:?\d]*)\S*$/
@@ -140,7 +139,10 @@ const processImage = async (
     let processedSteps = []
     const ext = fileType || source.match(re)[1]
     const input = await getSource(source, quiet)
-    const color = await colorThief.getColor(input)
+    const { hex, rgb } = await getColor(input, {
+      bypassSourceCheck: true,
+      quiet,
+    })
 
     if (!noWrite) {
       if (!quiet) {
@@ -157,11 +159,7 @@ const processImage = async (
       }
     }
 
-    return Promise.resolve({
-      images: processedSteps,
-      rgb: color,
-      hex: RGBToHex(color),
-    })
+    return Promise.resolve({ images: processedSteps, rgb, hex })
   } catch (err) {
     if (!quiet) {
       spinner.fail(err.stack)
@@ -183,6 +181,20 @@ function RGBToHex(rgb) {
 }
 
 export default processImage
+
+export async function getColor(
+  source,
+  { bypassSourceCheck = false, quiet = true } = {}
+) {
+  let input
+  if (bypassSourceCheck) {
+    input = source
+  } else {
+    input = await getSource(source, quiet)
+  }
+  const rgb = await colorThief.getColor(input)
+  return { hex: RGBToHex(rgb), rgb }
+}
 
 export async function retinify(source, size, options) {
   const opts = Object.assign({}, options, {
