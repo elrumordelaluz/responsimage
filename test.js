@@ -77,7 +77,7 @@ test('Resize only width', async t => {
   )
 })
 
-test('URL input', async t => {
+test.skip('URL input', async t => {
   const { dir, name, externalUrl: input } = t.context
   const steps = [{ size: [250, 250], name }]
 
@@ -100,14 +100,14 @@ test('Retina', async t => {
   )
 })
 
-test.only('Dominant Color', async t => {
+test('Dominant Color', async t => {
   const { dir, name } = t.context
   const steps = [{ size: [250, 250], name }]
   const input = path.resolve('./fixtures', 'color.jpg')
   const testRgb = await ColorThief.getColor(input)
 
   const {
-    color: { rgb, hex, hsl },
+    color: { rgb, hex },
   } = await processImage(input, {
     dir,
     steps,
