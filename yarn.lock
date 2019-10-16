@@ -995,6 +995,15 @@ color@^3.1.2:
     get-pixels "^3.3.2"
     quantize "github:lokesh/quantize"
 
+"colorthief@https://github.com/elrumordelaluz/color-thief":
+  version "2.3.0"
+  uid "396e1748d0b5ee17daf98d885cf48e1301a4f338"
+  resolved "https://github.com/elrumordelaluz/color-thief#396e1748d0b5ee17daf98d885cf48e1301a4f338"
+  dependencies:
+    file-type "12.3.0"
+    get-pixels "^3.3.2"
+    quantize "github:lokesh/quantize"
+
 combined-stream@^1.0.6, combined-stream@~1.0.6:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.8.tgz#c3d45a8b34fd730631a110a8a2520682b31d5a7f"
