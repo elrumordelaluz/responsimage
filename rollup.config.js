@@ -10,7 +10,7 @@ export default [
       'util',
       'sharp',
       'isomorphic-unfetch',
-      'node-vibrant',
+      'colorthief',
       'ora',
       'mkdirp',
     ],

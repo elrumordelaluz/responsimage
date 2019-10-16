@@ -6,7 +6,7 @@ import imageSize from 'image-size'
 import processImage, { retinify, getColor } from './dist/responsimage.cjs'
 import { promisify } from 'util'
 import hexColor from 'hex-color-regex'
-import * as Vibrant from 'node-vibrant'
+import ColorThief from 'colorthief'
 
 const sizeOf = promisify(imageSize)
 const pstat = promisify(fs.stat)
@@ -100,21 +100,11 @@ test('Retina', async t => {
   )
 })
 
-test('Dominant Color', async t => {
+test.only('Dominant Color', async t => {
   const { dir, name } = t.context
   const steps = [{ size: [250, 250], name }]
   const input = path.resolve('./fixtures', 'color.jpg')
-  const palette = await Vibrant.from(input).getPalette()
-
-  const rgbSwatches = Object.keys(palette).map(key => {
-    return palette[key].getRgb().join()
-  })
-  const hexSwatches = Object.keys(palette).map(key => {
-    return palette[key].getHex()
-  })
-  const hslSwatches = Object.keys(palette).map(key => {
-    return palette[key].getHsl().join()
-  })
+  const testRgb = await ColorThief.getColor(input)
 
   const {
     color: { rgb, hex, hsl },
@@ -124,9 +114,7 @@ test('Dominant Color', async t => {
     quiet: true,
   })
 
-  t.true(hexSwatches.includes(hex))
-  t.true(rgbSwatches.includes(rgb.join()))
-  t.true(hslSwatches.includes(hsl.join()))
+  t.true(testRgb.every(val => rgb.includes(val)))
   t.true(hexColor().test(hex))
 })
 
