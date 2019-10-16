@@ -5,8 +5,8 @@ import tmp from 'tmp'
 import imageSize from 'image-size'
 import processImage, { retinify, getColor } from './dist/responsimage.cjs'
 import { promisify } from 'util'
-import ColorThief from 'color-thief'
 import hexColor from 'hex-color-regex'
+import * as Vibrant from 'node-vibrant'
 
 const sizeOf = promisify(imageSize)
 const pstat = promisify(fs.stat)
@@ -101,17 +101,32 @@ test('Retina', async t => {
 })
 
 test('Dominant Color', async t => {
-  const colorThief = new ColorThief()
   const { dir, name } = t.context
   const steps = [{ size: [250, 250], name }]
   const input = path.resolve('./fixtures', 'color.jpg')
-  const dominant = await colorThief.getColor(input)
-  const { rgb, hex } = await processImage(input, {
+  const palette = await Vibrant.from(input).getPalette()
+
+  const rgbSwatches = Object.keys(palette).map(key => {
+    return palette[key].getRgb().join()
+  })
+  const hexSwatches = Object.keys(palette).map(key => {
+    return palette[key].getHex()
+  })
+  const hslSwatches = Object.keys(palette).map(key => {
+    return palette[key].getHsl().join()
+  })
+
+  const {
+    color: { rgb, hex, hsl },
+  } = await processImage(input, {
     dir,
     steps,
     quiet: true,
   })
-  t.true(rgb.every(c => dominant.includes(c)))
+  console.log({ rgb, hex, hsl })
+  t.true(hexSwatches.includes(hex))
+  t.true(rgbSwatches.includes(rgb.join()))
+  t.true(hslSwatches.includes(hsl.join()))
   t.true(hexColor().test(hex))
 })
 
@@ -129,13 +144,15 @@ test('No Write', async t => {
 
 test('Get Only Color', async t => {
   const { input } = t.context
-  const { rgb, hex } = await getColor(input)
+  const { rgb, hex, hsl } = await getColor(input)
   t.true(Array.isArray(rgb))
+  t.true(Array.isArray(hsl))
   t.true(typeof hex === 'string')
+  t.true(hexColor().test(hex))
 })
 
 test('Fails', async t => {
-  const { dir, input } = t.context
+  const { dir } = t.context
   const promise = () =>
     processImage(path.resolve('./fixtures', 'errored.jpg'), {
       dir,
@@ -143,6 +160,5 @@ test('Fails', async t => {
       quiet: true,
       noWrite: true,
     })
-  const error = await t.throwsAsync(promise)
-  t.is(error.message, 'Image given has not completed loading')
+  await t.throwsAsync(promise)
 })

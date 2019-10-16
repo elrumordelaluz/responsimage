@@ -16,10 +16,10 @@ const responsimage = require('responsimage')
 responsimage('http://lorempixel.com/1200/600/', {
   name: 'my-image',
   dir: './out',
-}).then(({ rgb, hex, images }) => {
+}).then(({ color: { rgb, hex, hsl }, images }) => {
   // rgb: [ 168, 182, 187 ]
   // hex: #a8b6bb
-  // images: []
+  // images: […]
 })
 ```
 
@@ -84,6 +84,14 @@ Type: `Object`
 const { retinify } = require('responsimage')
 
 retinify(input, size, [options])
+```
+
+```js
+const { getColor } = require('responsimage')
+
+getColor(input)
+
+// { rgb, hex, hsl }
 ```
 
 ## License

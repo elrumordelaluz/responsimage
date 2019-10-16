@@ -5,12 +5,11 @@ import sharp from 'sharp'
 import fetch from 'isomorphic-unfetch'
 import ora from 'ora'
 import mkdirp from 'mkdirp'
-import ColorThief from 'color-thief'
+import * as Vibrant from 'node-vibrant'
 const statAsync = promisify(stat)
 const mkdirAsync = promisify(mkdirp)
 
 const spinner = ora()
-const colorThief = new ColorThief()
 
 async function createDirIfDoesntExists(dir, quiet) {
   if (!quiet) {
@@ -139,7 +138,7 @@ const processImage = async (
     let processedSteps = []
     const ext = fileType || source.match(re)[1]
     const input = await getSource(source, quiet)
-    const { hex, rgb } = await getColor(input, {
+    const { hex, rgb, hsl } = await getColor(input, {
       bypassSourceCheck: true,
       quiet,
     })
@@ -159,25 +158,13 @@ const processImage = async (
       }
     }
 
-    return Promise.resolve({ images: processedSteps, rgb, hex })
+    return Promise.resolve({ images: processedSteps, color: { rgb, hex, hsl } })
   } catch (err) {
     if (!quiet) {
       spinner.fail(err.stack)
     }
     throw err
   }
-}
-
-function RGBToHex(rgb) {
-  let r = rgb[0].toString(16)
-  let g = rgb[1].toString(16)
-  let b = rgb[2].toString(16)
-
-  if (r.length == 1) r = '0' + r
-  if (g.length == 1) g = '0' + g
-  if (b.length == 1) b = '0' + b
-
-  return '#' + r + g + b
 }
 
 export default processImage
@@ -192,8 +179,18 @@ export async function getColor(
   } else {
     input = await getSource(source, quiet)
   }
-  const rgb = await colorThief.getColor(input)
-  return { hex: RGBToHex(rgb), rgb }
+  const palette = await Vibrant.from(input).getPalette()
+
+  const swatch = Object.keys(palette).reduce((acc, curr) => {
+    const currPopulation = palette[curr].getPopulation()
+    return acc && acc.getPopulation() > currPopulation ? acc : palette[curr]
+  }, null)
+
+  const hex = swatch.getHex()
+  const rgb = swatch.getRgb()
+  const hsl = swatch.getHsl()
+
+  return { hex, rgb, hsl }
 }
 
 export async function retinify(source, size, options) {
