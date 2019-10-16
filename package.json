@@ -10,7 +10,7 @@
     "README.md"
   ],
   "dependencies": {
-    "colorthief": "2.3.0",
+    "colorthief": "git+ssh://git@github.com:elrumordelaluz/color-thief.git",
     "isomorphic-unfetch": "3.0.0",
     "mkdirp": "0.5.1",
     "ora": "4.0.2",

@@ -77,7 +77,7 @@ test('Resize only width', async t => {
   )
 })
 
-test.skip('URL input', async t => {
+test('URL input', async t => {
   const { dir, name, externalUrl: input } = t.context
   const steps = [{ size: [250, 250], name }]
 
