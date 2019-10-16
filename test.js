@@ -123,7 +123,7 @@ test('Dominant Color', async t => {
     steps,
     quiet: true,
   })
-  console.log({ rgb, hex, hsl })
+
   t.true(hexSwatches.includes(hex))
   t.true(rgbSwatches.includes(rgb.join()))
   t.true(hslSwatches.includes(hsl.join()))
