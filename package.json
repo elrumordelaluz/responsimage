@@ -1,6 +1,6 @@
 {
   "name": "responsimage",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "main": "dist/responsimage.cjs.js",
   "module": "dist/responsimage.esm.js",
   "author": "Lionel T <elrumordelaluz@hotmail.com> (https://elrumordelaluz.com/)",
