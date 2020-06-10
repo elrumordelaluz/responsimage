@@ -7,7 +7,6 @@ import ColorThief from 'colorthief'
 import ora from 'ora'
 import mkdirp from 'mkdirp'
 const statAsync = promisify(stat)
-const mkdirAsync = promisify(mkdirp)
 
 const spinner = ora()
 
@@ -25,7 +24,7 @@ async function createDirIfDoesntExists(dir, quiet) {
     if (!quiet) {
       spinner.succeed(`Directory ${dir} created`)
     }
-    return mkdirAsync(dir)
+    return mkdirp(dir)
   }
 }
 
@@ -36,8 +35,8 @@ const getSource = async (source, quiet) => {
   }
   if (urlRe.test(source)) {
     return await fetch(source)
-      .then(response => response.arrayBuffer())
-      .then(arrayBuffer => {
+      .then((response) => response.arrayBuffer())
+      .then((arrayBuffer) => {
         if (!quiet) {
           spinner.succeed(`Source image fetched successfully`)
         }
@@ -104,8 +103,9 @@ const processStep = async (image, step, options) => {
       }
       if (!options.quiet) {
         spinner.succeed(
-          `${stepName} [${step.size[0] || 'auto'}, ${step.size[1] ||
-            'auto'}] (${ext}${webp ? ' + webp' : ''})`
+          `${stepName} [${step.size[0] || 'auto'}, ${
+            step.size[1] || 'auto'
+          }] (${ext}${webp ? ' + webp' : ''})`
         )
       }
       return Promise.resolve(filename)
@@ -158,7 +158,10 @@ const processImage = async (
       }
     }
 
-    return Promise.resolve({ images: processedSteps, color: { rgb, hex, hsl } })
+    return Promise.resolve({
+      images: processedSteps,
+      color: { rgb, hex, hsl },
+    })
   } catch (err) {
     if (!quiet) {
       spinner.fail(err.stack)
@@ -191,7 +194,7 @@ export async function retinify(source, size, options) {
     steps: [
       {
         stepName: '2x Image',
-        size: size.map(s => s * 2),
+        size: size.map((s) => s * 2),
         suffix: '_retina',
       },
       {
@@ -207,7 +210,7 @@ function rgbToHex(r, g, b) {
   return (
     '#' +
     [r, g, b]
-      .map(x => {
+      .map((x) => {
         const hex = x.toString(16)
         return hex.length === 1 ? '0' + hex : hex
       })

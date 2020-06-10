@@ -12,18 +12,19 @@
   "dependencies": {
     "colorthief": "https://github.com/elrumordelaluz/color-thief",
     "isomorphic-unfetch": "3.0.0",
-    "mkdirp": "0.5.1",
-    "ora": "4.0.2",
-    "sharp": "0.23.1"
+    "mkdirp": "^1.0.4",
+    "ora": "^4.0.4",
+    "sharp": "^0.25.3"
   },
   "devDependencies": {
-    "@babel/core": "7.6.4",
-    "ava": "2.4.0",
+    "@ava/babel": "^1.0.1",
+    "@babel/core": "^7.10.2",
+    "@rollup/plugin-babel": "^5.0.3",
+    "ava": "^3.8.2",
     "hex-color-regex": "1.1.0",
     "image-size": "0.8.3",
-    "rollup": "1.24.0",
-    "rollup-plugin-babel": "4.3.3",
-    "tmp": "0.1.0"
+    "rollup": "^2.15.0",
+    "tmp": "^0.2.1"
   },
   "scripts": {
     "prepare": "npm run build",
@@ -31,5 +32,8 @@
     "dev": "rollup -c -w",
     "test": "ava",
     "pretest": "npm run build"
+  },
+  "ava": {
+    "babel": true
   }
 }
