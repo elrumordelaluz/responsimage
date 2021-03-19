@@ -77,7 +77,7 @@ const defaultSteps = [
   },
 ]
 
-const processStep = async (image, step, options) => {
+const processStep = async (image, step, options, jpegOptions) => {
   const suffix = step.suffix || ''
   const name = step.name || options.name
   const webp = step.webp || (step.webp === undefined && options.webp)
@@ -96,7 +96,11 @@ const processStep = async (image, step, options) => {
       }
       const init = await image.clone().resize(step.size[0], step.size[1])
       const filename = resolve(dir, `${name}${suffix}.${ext}`)
-      await init.toFile(filename)
+      if (ext === 'jpg') {
+        await init.jpeg(jpegOptions).toFile(filename)
+      } else {
+        await init.toFile(filename)
+      }
       if (webp) {
         const filenameWebp = resolve(dir, `${name}${suffix}.webp`)
         await init.webp().toFile(filenameWebp)
@@ -132,6 +136,7 @@ const processImage = async (
     steps = defaultSteps,
     quiet = false,
     noWrite = false,
+    jpegOptions = {},
   } = {}
 ) => {
   try {
@@ -153,7 +158,7 @@ const processImage = async (
       const options = { webp, dir, name, ext, quiet }
 
       for (let step of steps) {
-        const f = await processStep(initImage, step, options)
+        const f = await processStep(initImage, step, options, jpegOptions)
         processedSteps.push(f)
       }
     }
