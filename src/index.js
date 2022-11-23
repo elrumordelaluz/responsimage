@@ -1,4 +1,4 @@
-import { stat } from 'fs'
+import { stat, promises as fs } from 'fs'
 import { resolve } from 'path'
 import { promisify } from 'util'
 import sharp from 'sharp'
@@ -6,6 +6,8 @@ import fetch from 'isomorphic-unfetch'
 import ColorThief from 'colorthief'
 import ora from 'ora'
 import mkdirp from 'mkdirp'
+import imageType from 'image-type'
+
 const statAsync = promisify(stat)
 
 const spinner = ora()
@@ -43,7 +45,9 @@ const getSource = async (source, quiet) => {
         return toBuffer(arrayBuffer)
       })
   }
-  return Promise.resolve(source)
+
+  return await fs.readFile(source)
+  // return Promise.resolve(source)
 }
 
 function toBuffer(ab) {
@@ -137,16 +141,25 @@ const processImage = async (
     quiet = false,
     noWrite = false,
     jpegOptions = {},
+    color = true,
   } = {}
 ) => {
   try {
     let processedSteps = []
     const ext = fileType || source.match(re)[1]
     const input = await getSource(source, quiet)
-    const { hex, rgb, hsl } = await getColor(input, {
-      bypassSourceCheck: true,
-      quiet,
-    })
+    const imgType = await checkImageType(input)
+    let colorOutput = {}
+    if (!imgType) {
+      throw Error('No image as input')
+    }
+    if (color) {
+      const { hex, rgb, hsl } = await getColor(input, {
+        bypassSourceCheck: true,
+        quiet,
+      })
+      colorOutput = { hex, rgb, hsl }
+    }
 
     if (!noWrite) {
       if (!quiet) {
@@ -165,9 +178,10 @@ const processImage = async (
 
     return Promise.resolve({
       images: processedSteps,
-      color: { rgb, hex, hsl },
+      color: colorOutput,
     })
   } catch (err) {
+    console.log(err)
     if (!quiet) {
       spinner.fail(err.stack)
     }
@@ -182,14 +196,22 @@ export async function getColor(
   { bypassSourceCheck = false, quiet = true } = {}
 ) {
   let input
-  if (bypassSourceCheck) {
-    input = source
-  } else {
-    input = await getSource(source, quiet)
+  let hex = '#ffffff'
+  let rgb = [255, 255, 255]
+  let hsl = [0, 100, 100]
+
+  try {
+    if (bypassSourceCheck) {
+      input = source
+    } else {
+      input = await getSource(source, quiet)
+    }
+    rgb = await ColorThief.getColor(input)
+    hex = rgbToHex(...rgb)
+    hsl = rgbToHsl(...rgb)
+  } catch (err) {
+    console.log(err)
   }
-  const rgb = await ColorThief.getColor(input)
-  const hex = rgbToHex(...rgb)
-  const hsl = rgbToHsl(...rgb)
 
   return { hex, rgb, hsl }
 }
@@ -259,4 +281,9 @@ function rgbToHsl(r, g, b) {
   l = +(l * 100).toFixed(1)
 
   return [h, s, l]
+}
+
+async function checkImageType(input) {
+  const buffer = Buffer.from(input)
+  return imageType(buffer)
 }

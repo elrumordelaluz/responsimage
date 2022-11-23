@@ -11,10 +11,11 @@
   ],
   "dependencies": {
     "colorthief": "https://github.com/elrumordelaluz/color-thief",
+    "image-type": "4.1.0",
     "isomorphic-unfetch": "3.0.0",
     "mkdirp": "^1.0.4",
     "ora": "^4.0.4",
-    "sharp": "^0.25.3"
+    "sharp": "^0.30.7"
   },
   "devDependencies": {
     "@ava/babel": "^1.0.1",

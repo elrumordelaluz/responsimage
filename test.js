@@ -74,7 +74,7 @@ test('Resize only width', async (t) => {
   const factor = originalWidth / newWidth
   t.deepEqual(
     { width, height },
-    { width: newWidth, height: Math.round(originalHeight / factor) }
+    { width: newWidth, height: Math.floor(originalHeight / factor) }
   )
 })
 
