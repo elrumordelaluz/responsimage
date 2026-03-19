@@ -3,7 +3,6 @@ import { resolve } from 'path'
 import { promisify } from 'util'
 import sharp from 'sharp'
 import fetch from 'isomorphic-unfetch'
-import ColorThief from 'colorthief'
 import * as oraModule from 'ora'
 import * as mkdirpModule from 'mkdirp'
 import * as imageTypeModule from 'image-type'
@@ -232,7 +231,10 @@ export async function getColor(
     } else {
       input = await getSource(source, quiet)
     }
-    rgb = await ColorThief.getColor(input)
+    const {
+      dominant: { r, g, b },
+    } = await sharp(input).stats()
+    rgb = [Math.round(r), Math.round(g), Math.round(b)]
     hex = rgbToHex(...rgb)
     hsl = rgbToHsl(...rgb)
   } catch (err) {

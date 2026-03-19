@@ -13,7 +13,6 @@ export default [
       'util',
       'sharp',
       'isomorphic-unfetch',
-      'colorthief',
       'ora',
       'mkdirp',
       'image-type',

@@ -17,7 +17,6 @@
     "README.md"
   ],
   "dependencies": {
-    "colorthief": "https://github.com/elrumordelaluz/color-thief",
     "image-type": "6.0.0",
     "isomorphic-unfetch": "4.0.2",
     "mkdirp": "^3.0.1",

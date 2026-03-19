@@ -6,7 +6,6 @@ import imageSize from 'image-size'
 import processImage, { retinify, getColor } from './dist/responsimage.esm.js'
 import { promisify } from 'util'
 import hexColor from 'hex-color-regex'
-import ColorThief from 'colorthief'
 
 const sizeOf = async (source) => imageSize(await fs.promises.readFile(source))
 const pstat = promisify(fs.stat)
@@ -117,18 +116,21 @@ test('Dominant Color', async (t) => {
   const { dir, name } = t.context
   const steps = [{ size: [250, 250], name }]
   const input = path.resolve('./fixtures', 'color.jpg')
-  const testRgb = await ColorThief.getColor(input)
 
   const {
-    color: { rgb, hex },
+    color: { rgb, hex, hsl },
   } = await processImage(input, {
     dir,
     steps,
     quiet: true,
   })
 
-  t.true(testRgb.every((val) => rgb.includes(val)))
+  t.true(Array.isArray(rgb))
+  t.true(rgb.length === 3)
+  t.true(rgb.every((val) => Number.isInteger(val) && val >= 0 && val <= 255))
   t.true(hexColor().test(hex))
+  t.true(Array.isArray(hsl))
+  t.true(hsl.length === 3)
 })
 
 test('No Write', async (t) => {
