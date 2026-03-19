@@ -1,5 +1,8 @@
 import babel from '@rollup/plugin-babel'
-import pkg from './package.json'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json')
 
 export default [
   {
@@ -18,6 +21,7 @@ export default [
     ],
     plugins: [
       babel({
+        babelHelpers: 'bundled',
         exclude: ['node_modules/**'],
       }),
     ],

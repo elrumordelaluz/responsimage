@@ -3,6 +3,13 @@
   "version": "3.3.0",
   "main": "dist/responsimage.cjs.js",
   "module": "dist/responsimage.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/responsimage.esm.js",
+      "require": "./dist/responsimage.cjs.js",
+      "default": "./dist/responsimage.esm.js"
+    }
+  },
   "author": "Lionel T <elrumordelaluz@hotmail.com> (https://elrumordelaluz.com/)",
   "license": "MIT",
   "files": [
@@ -11,21 +18,21 @@
   ],
   "dependencies": {
     "colorthief": "https://github.com/elrumordelaluz/color-thief",
-    "image-type": "4.1.0",
-    "isomorphic-unfetch": "3.0.0",
-    "mkdirp": "^1.0.4",
-    "ora": "^4.0.4",
-    "sharp": "^0.30.7"
+    "image-type": "6.0.0",
+    "isomorphic-unfetch": "4.0.2",
+    "mkdirp": "^3.0.1",
+    "ora": "^9.3.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "@ava/babel": "^1.0.1",
-    "@babel/core": "^7.10.2",
-    "@rollup/plugin-babel": "^5.0.3",
-    "ava": "^3.8.2",
+    "@ava/babel": "^2.0.0",
+    "@babel/core": "^7.29.0",
+    "@rollup/plugin-babel": "^7.0.0",
+    "ava": "^7.0.0",
     "hex-color-regex": "1.1.0",
-    "image-size": "0.8.3",
-    "rollup": "^2.15.0",
-    "tmp": "^0.2.1"
+    "image-size": "2.0.2",
+    "rollup": "^4.59.0",
+    "tmp": "^0.2.5"
   },
   "scripts": {
     "prepare": "npm run build",

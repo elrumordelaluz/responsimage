@@ -4,13 +4,39 @@ import { promisify } from 'util'
 import sharp from 'sharp'
 import fetch from 'isomorphic-unfetch'
 import ColorThief from 'colorthief'
-import ora from 'ora'
-import mkdirp from 'mkdirp'
-import imageType from 'image-type'
+import * as oraModule from 'ora'
+import * as mkdirpModule from 'mkdirp'
+import * as imageTypeModule from 'image-type'
 
 const statAsync = promisify(stat)
+const resolveModuleFn = (module, namedExport) => {
+  if (typeof module === 'function') {
+    return module
+  }
+  if (module && typeof module[namedExport] === 'function') {
+    return module[namedExport]
+  }
+  const firstDefault = module && module.default
+  if (typeof firstDefault === 'function') {
+    return firstDefault
+  }
+  if (firstDefault && typeof firstDefault[namedExport] === 'function') {
+    return firstDefault[namedExport]
+  }
+  const secondDefault = firstDefault && firstDefault.default
+  if (typeof secondDefault === 'function') {
+    return secondDefault
+  }
+  if (secondDefault && typeof secondDefault[namedExport] === 'function') {
+    return secondDefault[namedExport]
+  }
+  return module
+}
+const oraFactory = resolveModuleFn(oraModule, 'ora')
+const mkdirpFn = resolveModuleFn(mkdirpModule, 'mkdirp')
+const detectImageType = resolveModuleFn(imageTypeModule, 'imageType')
 
-const spinner = ora()
+const spinner = oraFactory()
 
 async function createDirIfDoesntExists(dir, quiet) {
   if (!quiet) {
@@ -26,7 +52,7 @@ async function createDirIfDoesntExists(dir, quiet) {
     if (!quiet) {
       spinner.succeed(`Directory ${dir} created`)
     }
-    return mkdirp(dir)
+    return mkdirpFn(dir)
   }
 }
 
@@ -285,5 +311,5 @@ function rgbToHsl(r, g, b) {
 
 async function checkImageType(input) {
   const buffer = Buffer.from(input)
-  return imageType(buffer)
+  return detectImageType(buffer)
 }
